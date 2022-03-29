@@ -1,0 +1,5 @@
+rootProject.name = "ClassInvokePlugin"
+include ':app'
+include ':plugin-privacy'
+include ':plugin-statistic'
+include ':plugin-timeout'
