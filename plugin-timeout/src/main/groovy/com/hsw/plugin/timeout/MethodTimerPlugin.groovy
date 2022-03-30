@@ -3,6 +3,8 @@ package com.hsw.plugin.timeout
 import com.android.build.gradle.AppExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
 
 /**
  * @author: hsw

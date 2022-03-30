@@ -32,6 +32,10 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -65,7 +69,7 @@ privacy {
 timer {
     methodTimer = [
             [
-                    'time'  : 5L,
+                    'time'  : 50L,
                     'owner': 'com/hsw',
             ],
             [

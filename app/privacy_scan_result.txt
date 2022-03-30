@@ -1,0 +1,9 @@
+com/hsw/classinvokeplugin/MainActivity.getMyName->()Ljava/lang/String; 
+com/hsw/classinvokeplugin/MainActivity.name->Ljava/lang/String; 
+com/hsw/classinvokeplugin/MainActivity.onCreate$lambda-0->(Lcom/hsw/classinvokeplugin/MainActivity;Landroid/view/View;)V 
+com/hsw/classinvokeplugin/MainActivity.getMyName->()Ljava/lang/String; 
+com/hsw/classinvokeplugin/MainActivity.access$getName$cp->()Ljava/lang/String; 
+com/hsw/classinvokeplugin/MainActivity.name->Ljava/lang/String; 
+com/hsw/classinvokeplugin/MainActivity.<clinit>->()V 
+com/hsw/classinvokeplugin/MainActivity.name->Ljava/lang/String; 
+

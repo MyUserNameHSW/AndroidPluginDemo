@@ -1,5 +1,6 @@
 package com.hsw.plugin.timeout
 
+import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes;

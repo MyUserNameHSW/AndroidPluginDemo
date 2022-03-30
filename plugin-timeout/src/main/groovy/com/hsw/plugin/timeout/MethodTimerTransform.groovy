@@ -14,9 +14,13 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
+import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.FieldVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.Opcodes
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -27,7 +31,7 @@ import java.util.zip.ZipEntry;
  * @author: hsw* @date: 2022/3/29
  * @desc:
  */
-class MethodTimerTransform extends Transform {
+class MethodTimerTransform extends Transform implements Opcodes {
     @Override
     String getName() {
         return "MethodTimer"
@@ -54,6 +58,9 @@ class MethodTimerTransform extends Transform {
             //不是增量更新删除所有的outputProvider
             outputProvider.deleteAll()
         }
+
+
+
         inputs.each { TransformInput input ->
             //遍历目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
@@ -64,6 +71,25 @@ class MethodTimerTransform extends Transform {
                 handleJarInput(jarInput, outputProvider)
             }
         }
+
+        //测试生成类文件
+//        ClassWriter cw = new ClassWriter(0);
+//        cw.visit(V1_8, ACC_PUBLIC,"clz/MyClass", null, "java/lang/Object",null);
+//        cw.visitEnd();
+//        byte[] b = cw.toByteArray();
+//        File newClass = new File("build/generated/clz/MyClass.class")
+//        if (newClass.exists()) {
+//            newClass.delete()
+//        }
+//
+//        if (!newClass.parentFile.exists()) {
+//            newClass.parentFile.mkdirs()
+//        }
+//
+//        newClass.createNewFile()
+//        FileOutputStream fos = new FileOutputStream(newClass);
+//        fos.write(b);
+//        fos.close();
     }
 /**
      * 处理文件目录下的class文件
@@ -78,6 +104,20 @@ class MethodTimerTransform extends Transform {
                     ClassReader classReader = new ClassReader(file.bytes)
                     ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
                     ClassVisitor classVisitor = new MethodTimerClassVisitor(classWriter)
+
+                    //测试在类中插入 Toast 方法
+//                    MethodVisitor methodVisitor = classWriter.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "toast", "(Ljava/lang/String;)V", null, null);
+//                    methodVisitor.visitParameter("message", 0);
+//                    methodVisitor.visitCode();
+//                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hsw/classinvokeplugin/App", "getInstance", "()Lcom/hsw/classinvokeplugin/App;", false);
+//                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+//                    methodVisitor.visitInsn(Opcodes.ICONST_0);
+//                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "android/widget/Toast", "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;", false);
+//                    methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "android/widget/Toast", "show", "()V", false);
+//                    methodVisitor.visitInsn(Opcodes.RETURN);
+//                    methodVisitor.visitMaxs(3, 1);
+//                    methodVisitor.visitEnd();
+
                     classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
                     byte[] code = classWriter.toByteArray()
                     FileOutputStream fos = new FileOutputStream(file.parentFile.absolutePath + File.separator + name)
@@ -151,6 +191,8 @@ class MethodTimerTransform extends Transform {
             tmpFile.delete()
         }
     }
+
+
 
     /**
      * 检查class文件是否需要处理

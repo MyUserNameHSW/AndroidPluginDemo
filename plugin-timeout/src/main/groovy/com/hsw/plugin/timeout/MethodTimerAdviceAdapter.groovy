@@ -1,5 +1,6 @@
 package com.hsw.plugin.timeout
 
+import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Type
@@ -13,15 +14,48 @@ import org.objectweb.asm.commons.AdviceAdapter
  */
 class MethodTimerAdviceAdapter extends AdviceAdapter {
 
+    String methodDesc
     String methodOwner
     String methodName
     int slotIndex
+    int api
+
+    Map<String, AnnEntity> annEntityMap = new HashMap<>()
 
     MethodTimerAdviceAdapter(int api, MethodVisitor methodVisitor, String owner, int access, String name, String descriptor) {
         super(api, methodVisitor, access, name, descriptor)
+        this.api = api
         this.methodOwner = owner
         this.methodName = name
+        this.methodDesc = descriptor
     }
+
+    @Override
+    AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitAnnotation(descriptor, visible)
+
+        if (descriptor.contains("FixMethod")) {
+            AnnEntity annEntity = new AnnEntity()
+            return new AnnotationVisitor(api, annotationVisitor) {
+                @Override
+                void visit(String name, Object value) {
+                    super.visit(name, value)
+                    annEntity.annotationData.put(name, value)
+                }
+
+                @Override
+                void visitEnd() {
+                    super.visitEnd()
+                    annEntity.methodOwner = methodOwner
+                    annEntity.methodName = methodName
+                    annEntity.methodDesc = methodDesc
+                    annEntityMap.put(methodOwner + methodName + methodDesc, annEntity)
+                }
+            }
+        }
+        return annotationVisitor
+    }
+
 
     @Override
     protected void onMethodEnter() {
@@ -31,6 +65,14 @@ class MethodTimerAdviceAdapter extends AdviceAdapter {
                 slotIndex = newLocal(Type.LONG_TYPE)
                 mv.visitMethodInsn(INVOKESTATIC, "java/lang/System", "currentTimeMillis", "()J", false)
                 mv.visitVarInsn(LSTORE, slotIndex)
+                AnnEntity annEntity = annEntityMap.get(methodOwner + methodName + methodDesc)
+                if (annEntity != null) {
+                    mv.visitMethodInsn(INVOKESTATIC, "com/hsw/classinvokeplugin/App", "getInstance", "()Lcom/hsw/classinvokeplugin/App;", false);
+                    mv.visitLdcInsn(annEntity.annotationData.get("desc"));
+                    mv.visitInsn(ICONST_0);
+                    mv.visitMethodInsn(INVOKESTATIC, "android/widget/Toast", "makeText", "(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "android/widget/Toast", "show", "()V", false);
+                }
             }
         }
     }
